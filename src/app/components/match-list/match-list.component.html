@@ -1,0 +1,64 @@
+<div class="match-list">
+  <div class="section-header">
+    <h2>Live Matches</h2>
+  </div>
+
+  <div class="matches-grid">
+    <div *ngFor="let match of matches; trackBy: trackByMatchId" class="card match-card" [routerLink]="['/matches', match.matchId]">
+      <div class="card-header">
+        <div class="live-indicator">
+          <span class="dot"></span>
+          <span class="status">Live</span>
+        </div>
+        <div class="match-title">
+          {{ match.team1 }} vs {{ match.team2 }} {{ match.matchDate || '2026' }}
+        </div>
+        <div class="chevron">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      </div>
+
+      <div class="match-info">
+        <span class="match-desc">{{ match.venue }}</span>
+      </div>
+
+      <div class="teams-section">
+        <div class="team-row">
+          <div class="team-meta">
+            <img [src]="match.team1Logo || 'https://via.placeholder.com/30'" alt="logo" class="team-logo">
+            <span class="team-name">{{ match.team1 }}</span>
+          </div>
+          <div class="score-meta">
+            <span class="score">{{ match.score1 }}</span>
+            <span class="overs" *ngIf="match.overs1">{{ match.overs1 }}</span>
+            <span class="batting-icon" *ngIf="match.battingTeam === match.team1">
+              <img src="/bat_icon.png" alt="bat" class="bat-img">
+            </span>
+          </div>
+        </div>
+
+        <div class="team-row">
+          <div class="team-meta">
+            <img [src]="match.team2Logo || 'https://via.placeholder.com/30'" alt="logo" class="team-logo">
+            <span class="team-name">{{ match.team2 }}</span>
+          </div>
+          <div class="score-meta">
+            <span class="score">{{ match.score2 }}</span>
+            <span class="overs" *ngIf="match.overs2">{{ match.overs2 }}</span>
+            <span class="batting-icon" *ngIf="match.battingTeam === match.team2">
+              <img src="/bat_icon.png" alt="bat" class="bat-img">
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <span class="toss-info">{{ match.toss }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="matches.length === 0" class="no-matches">
+    <p>No live matches currently available.</p>
+  </div>
+</div>

@@ -1,0 +1,24 @@
+<div class="news-detail-container">
+  <div *ngIf="loading" class="loading">Loading article...</div>
+  
+  <div *ngIf="!loading && news" class="article">
+    <h1>{{ news.title }}</h1>
+    
+    <div class="meta">
+        <span class="author" *ngIf="news.author">By {{ news.author }}</span>
+        <span class="date" *ngIf="news.date">{{ news.date }}</span>
+    </div>
+
+    <div class="main-image" *ngIf="news.image">
+        <img [src]="news.image" [alt]="news.title">
+    </div>
+
+    <div class="content">
+        <p *ngFor="let p of news.content">{{ p }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !news" class="error">
+      Failed to load news article.
+  </div>
+</div>

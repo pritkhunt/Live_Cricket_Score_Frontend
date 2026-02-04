@@ -1,0 +1,154 @@
+.match-list {
+  .section-header {
+    margin-bottom: 15px;
+    h2 {
+      font-size: 1.25rem;
+      color: var(--accent-blue);
+    }
+  }
+
+  .matches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 15px;
+  }
+
+  .match-card {
+    background-color: #121212;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #2a2a2a;
+    color: #ffffff;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+      border-color: #444;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+
+      .live-indicator {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        
+        .dot {
+          width: 8px;
+          height: 8px;
+          background-color: #ff4d4d;
+          border-radius: 50%;
+          box-shadow: 0 0 8px #ff4d4d;
+        }
+
+        .status {
+          color: #ff4d4d;
+          font-weight: 700;
+          font-size: 0.9rem;
+          text-transform: uppercase;
+        }
+      }
+
+      .match-title {
+        flex: 1;
+        font-weight: 600;
+        font-size: 1rem;
+        color: #e0e0e0;
+      }
+
+      .chevron {
+        color: #666;
+      }
+    }
+
+    .match-info {
+      margin-bottom: 16px;
+      .match-desc {
+        font-size: 0.85rem;
+        color: #888;
+      }
+    }
+
+    .teams-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .team-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .team-meta {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          .team-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #222;
+            padding: 2px;
+          }
+
+          .team-name {
+            font-weight: 500;
+            font-size: 1rem;
+            color: #ccc;
+          }
+        }
+
+        .score-meta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .score {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #4a90e2; // Blue as seen in screenshot
+          }
+
+          .overs {
+            font-size: 0.9rem;
+            color: #888;
+            font-weight: 500;
+          }
+
+          .batting-icon {
+            display: flex;
+            align-items: center;
+            
+            .bat-img {
+              width: 16px;
+              height: 16px;
+              object-fit: contain;
+            }
+          }
+        }
+      }
+    }
+
+    .card-footer {
+      .toss-info {
+        font-size: 0.9rem;
+        color: #f5a623; // Orange for toss info
+        font-weight: 500;
+      }
+    }
+  }
+
+  .no-matches {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+  }
+}

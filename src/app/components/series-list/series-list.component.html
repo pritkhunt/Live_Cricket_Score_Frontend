@@ -1,0 +1,18 @@
+<div class="series-container">
+  <h2>Cricket Series</h2>
+  <div *ngIf="loading" class="loading">Loading series...</div>
+  <div *ngIf="!loading">
+    <div *ngFor="let group of groupedSeries" class="month-group">
+        <h3 class="month-header">{{ group.month }}</h3>
+        <div class="series-grid">
+            <div class="series-card" *ngFor="let s of group.series">
+              <div class="series-info">
+                <h3>{{ s.name }}</h3>
+                <span class="date">{{ s.date }}</span>
+              </div>
+              <a [routerLink]="['/series', s.id]" class="view-btn">View Details</a>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>

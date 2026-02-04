@@ -1,0 +1,19 @@
+<div class="team-container">
+  <h2>Teams</h2>
+  <div class="search-container">
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm" 
+      (input)="onSearch()" 
+      placeholder="Search teams..." 
+      class="search-input"
+    >
+  </div>
+  <div *ngIf="loading" class="loading">Loading teams...</div>
+  <div *ngIf="!loading" class="team-grid">
+    <div class="team-card" *ngFor="let t of filteredTeams" [routerLink]="['/teams', t.id]">
+      <img [src]="t.image || '/assets/images/default-team-logo.png'" [alt]="t.name" (error)="handleImageError($event)">
+      <h3>{{ t.name }}</h3>
+    </div>
+  </div>
+</div>

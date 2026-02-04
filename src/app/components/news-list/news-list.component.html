@@ -1,0 +1,16 @@
+<div class="news-container">
+  <h2>Latest News</h2>
+  <div *ngIf="loading" class="loading">Loading news...</div>
+  <div *ngIf="!loading" class="news-grid">
+    <div class="news-card" *ngFor="let n of news">
+      <div class="news-img" *ngIf="n.image">
+          <img [src]="n.image" [alt]="n.title">
+      </div>
+      <div class="news-content">
+        <h3>{{ n.title }}</h3>
+        <p>{{ n.description }}</p>
+        <a [routerLink]="['/news', n.id]" class="read-more">Read More</a>
+      </div>
+    </div>
+  </div>
+</div>

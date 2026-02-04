@@ -1,0 +1,180 @@
+<div class="series-detail-container">
+    <div *ngIf="series" class="series-header-banner">
+        <div class="banner-content">
+            <div class="series-logo-box">
+                <!-- Use scraped series logo, fallback to placeholder -->
+                <img [src]="series.seriesLogo || 'assets/images/series-placeholder.png'" 
+                     (error)="series.seriesLogo = 'assets/images/series-placeholder.png'"
+                     alt="Series Logo">
+            </div>
+            <div class="series-info-center">
+                <h1>{{ series.title }}</h1>
+                <div class="series-date">{{ series.dates }}</div>
+            </div>
+            <div class="series-sponsor-box">
+                <!-- Use scraped sponsor logo, hide if empty -->
+                <img *ngIf="series.sponsorLogo" [src]="series.sponsorLogo" 
+                     (error)="series.sponsorLogo = null" 
+                     alt="Sponsor" style="opacity: 0.8;">
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-tabs">
+        <div class="tab" [class.active]="activeTab === 'overview'" (click)="switchTab('overview')">Overview</div>
+        <div class="tab" [class.active]="activeTab === 'matches'" (click)="switchTab('matches')">Matches</div>
+        <div class="tab" [class.active]="activeTab === 'squads'" (click)="switchTab('squads')">Squads</div>
+        <div class="tab" [class.active]="activeTab === 'points'" (click)="switchTab('points')">Points Table</div>
+        <div class="tab" [class.active]="activeTab === 'news'" (click)="switchTab('news')">News</div>
+    </div>
+
+    <div class="content-area">
+        <div *ngIf="loading" class="loading">Loading...</div>
+
+        <!-- Overview Tab -->
+        <div *ngIf="activeTab === 'overview' && !loading">
+            <div class="section-card">
+                <h2>About the Series</h2>
+                <p class="overview-text">{{ overview }}</p>
+            </div>
+        </div>
+
+        <!-- News Tab -->
+        <div *ngIf="activeTab === 'news' && !loading">
+            <div class="news-list" *ngIf="seriesNews && seriesNews.length > 0; else noNews">
+                <div class="news-card" *ngFor="let n of seriesNews" (click)="openNews(n.id)">
+                    <img [src]="n.image" [alt]="n.title" onerror="this.src='assets/images/news-placeholder.png'">
+                    <div class="news-info">
+                        <h3>{{ n.title }}</h3>
+                        <p *ngIf="n.description">{{ n.description }}</p>
+                    </div>
+                </div>
+            </div>
+            <ng-template #noNews>
+                <div class="empty-state">No news available for this series.</div>
+            </ng-template>
+        </div>
+
+        <!-- Matches Tab -->
+        <div *ngIf="activeTab === 'matches' && !loading">
+            <div class="schedule-container" *ngIf="groupedMatches && groupedMatches.length > 0; else noMatches">
+                
+                <div class="date-group" *ngFor="let group of groupedMatches">
+                    <!-- Optional Date Header: If valid date, show it. Else maybe hide or show 'Matches' -->
+                    <div class="date-header" *ngIf="group.date !== 'Upcoming'">{{ group.date }}</div>
+                    
+                    <div class="match-item" *ngFor="let m of group.matches">
+                        <div class="match-meta">
+                            {{ (m.info || '').split(',')[0].replace(' on', '') }}, {{ seriesName }}
+                        </div>
+                        
+                        <div class="match-body">
+                            <!-- Left Team -->
+                            <div class="team-side left">
+                                <img [src]="m.t1Logo" class="team-logo" alt="">
+                                <div class="team-info">
+                                    <div class="t-name">{{ m.t1 }}</div>
+                                    <div class="t-score" *ngIf="m.t1Score">{{ m.t1Score }} <span class="overs" *ngIf="m.t1Overs">{{ m.t1Overs }}</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Center Status/Result -->
+                            <div class="match-center">
+                                <div class="result-text" *ngIf="m.score">{{ m.score }}</div>
+                                <div class="status-sub" *ngIf="m.score">{{ m.status }}</div>
+                                
+                                <div class="upcoming-info" *ngIf="!m.score">
+                                    <div class="match-info-sub">{{ m.info }}</div>
+                                    <div class="time-text">{{ m.date || m.status }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Right Team -->
+                            <div class="team-side right">
+                                <div class="team-info">
+                                    <div class="t-name">{{ m.t2 }}</div>
+                                    <div class="t-score" *ngIf="m.t2Score">{{ m.t2Score }} <span class="overs" *ngIf="m.t2Overs">{{ m.t2Overs }}</span></div>
+                                </div>
+                                <img [src]="m.t2Logo" class="team-logo" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <ng-template #noMatches>
+                <div class="empty-state">No matches found.</div>
+            </ng-template>
+        </div>
+
+        <!-- Squads Tab -->
+        <div *ngIf="activeTab === 'squads' && !loading">
+             <div class="squad-list" *ngIf="squads && squads.length > 0; else noSquads">
+                 <div class="squad-card" *ngFor="let s of squads" (click)="openSquad(s.name)">
+                     <img [src]="s.img" class="squad-logo" alt="" *ngIf="s.img" (error)="s.img = null">
+                     <div class="squad-info">
+                         <h3>{{ s.name }}</h3>
+                         <span *ngIf="s.count" class="player-count">{{ s.count }}</span>
+                     </div>
+                 </div>
+             </div>
+             
+             <!-- Player Modal -->
+             <div class="modal-overlay" *ngIf="selectedTeam" (click)="closeSquad()">
+                 <div class="modal-content" (click)="$event.stopPropagation()">
+                     <div class="modal-header">
+                         <h2>{{ selectedTeam }} Squad</h2>
+                         <button class="close-btn" (click)="closeSquad()">×</button>
+                     </div>
+                     
+                     <div *ngIf="loadingPlayers" class="loading">Loading players...</div>
+                     
+                     <div *ngIf="!loadingPlayers && squadPlayers" class="players-grid">
+                         <div class="player-card" *ngFor="let p of squadPlayers">
+                             <div class="player-info">
+                                 <div class="player-name">{{ p.name }}</div>
+                                 <div class="player-role">{{ p.role }}</div>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+             <ng-template #noSquads>
+                <div class="empty-state">No squads found.</div>
+            </ng-template>
+        </div>
+
+        <!-- Points Table Tab -->
+        <div *ngIf="activeTab === 'points' && !loading">
+            <div class="points-table-wrapper" *ngIf="pointsTable && pointsTable.length > 0; else noPoints">
+                <table class="points-table">
+                    <thead>
+                        <tr>
+                            <th>Team</th>
+                            <th>P</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>NR</th>
+                            <th>Pts</th>
+                            <th>NRR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let row of pointsTable">
+                            <td class="team-col">{{ row.team }}</td>
+                            <td>{{ row.matches }}</td>
+                            <td>{{ row.won }}</td>
+                            <td>{{ row.lost }}</td>
+                            <td>{{ row.nr }}</td>
+                            <td class="pts">{{ row.pts }}</td>
+                            <td>{{ row.nrr }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <ng-template #noPoints>
+                <div class="empty-state">No points table available.</div>
+            </ng-template>
+        </div>
+    </div>
+</div>

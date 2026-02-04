@@ -1,0 +1,316 @@
+<div class="match-detail" *ngIf="match">
+  <!-- Match Header -->
+  <div class="card header-card">
+    <div class="match-info-top">
+      <span>{{ match.venue }}</span>
+      <span class="badge live">{{ match.status }}</span>
+    </div>
+
+    <div class="score-summary">
+      <div class="team-block">
+        <img [src]="match.team1Logo" alt="logo" class="large-logo">
+        <h3>{{ match.team1 }}</h3>
+        <div class="main-score">
+          {{ match.score1 }}
+          <span class="overs-display" *ngIf="match.overs1">({{ match.overs1 }})</span>
+        </div>
+      </div>
+      <div class="vs-block">
+        <div class="match-status" *ngIf="match.matchStatus" [ngClass]="getBallClass(match.matchStatus)">{{ match.matchStatus }}</div>
+        <div class="vs-text" *ngIf="!match.matchStatus">VS</div>
+      </div>
+      <div class="team-block">
+        <img [src]="match.team2Logo" alt="logo" class="large-logo">
+        <h3>{{ match.team2 }}</h3>
+        <div class="main-score">
+          {{ match.score2 }}
+          <span class="overs-display" *ngIf="match.overs2">({{ match.overs2 }})</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toss-info">{{ match.toss }}</div>
+
+    <!-- Recent Balls Display -->
+    <div class="recent-balls-container" *ngIf="match.recentOvers && match.recentOvers.length > 0">
+      <div class="recent-label">RECENT</div>
+      <div class="balls-list">
+        <span class="ball-circle" *ngFor="let ball of match.recentOvers" [ngClass]="getBallClass(ball)">
+          {{ ball }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs">
+    <div class="tab" [class.active]="activeTab === 'info'" (click)="activeTab = 'info'">INFO</div>
+    <div class="tab" [class.active]="activeTab === 'live'" (click)="activeTab = 'live'">LIVE</div>
+    <div class="tab" [class.active]="activeTab === 'scorecard'" (click)="activeTab = 'scorecard'">SCORECARD</div>
+    <div class="tab" [class.active]="activeTab === 'commentary'" (click)="activeTab = 'commentary'">COMMENTARY</div>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Info Tab -->
+    <div *ngIf="activeTab === 'info'" class="info-tab">
+      <div class="card">
+        <h4>Match Info</h4>
+        <div class="info-row"><label>Match</label><span>{{ match.team1 }} vs {{ match.team2 }}</span></div>
+        <div class="info-row"><label>Venue</label><span>{{ match.venue }}</span></div>
+        <div class="info-row"><label>Toss</label><span>{{ match.toss }}</span></div>
+      </div>
+      <div class="card">
+        <h4>Playing XI</h4>
+        <div class="xi-container">
+          <div class="xi-column">
+             <h5>{{ match.team1 }}</h5>
+             <div class="xi-list">
+                <div class="xi-player" *ngFor="let p of match.playingXI?.team1">
+                   <div class="xi-avatar">{{ p.charAt(0) }}</div>
+                   <span>{{ p }}</span>
+                </div>
+             </div>
+          </div>
+          <div class="xi-separator"></div>
+          <div class="xi-column">
+             <h5>{{ match.team2 }}</h5>
+             <div class="xi-list">
+                <div class="xi-player" *ngFor="let p of match.playingXI?.team2">
+                   <div class="xi-avatar">{{ p.charAt(0) }}</div>
+                   <span>{{ p }}</span>
+                </div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Tab -->
+    <div *ngIf="activeTab === 'live'" class="live-tab">
+      
+      <!-- Live Score Header / Status -->
+      <div class="live-status-card" *ngIf="currentBatsmen.length > 0">
+        <div class="batsmen-container">
+          <div class="batsman-card" *ngFor="let bat of currentBatsmen">
+            <div class="player-avatar">
+               <!-- Placeholder Avatar -->
+               <img src="https://www.w3schools.com/howto/img_avatar.png" alt="Avatar">
+            </div>
+            <div class="player-info">
+              <div class="p-name">{{ bat.batsman }}</div>
+              <div class="p-score">
+                 <span class="runs">{{ bat.runs }}</span>
+                 <span class="balls">({{ bat.balls }})</span>
+                 <span *ngIf="bat.batsman.includes('*')" class="strike-indicator" title="On Strike">
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="#FBC02D">
+                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                   </svg>
+                 </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="vs-divider" *ngIf="currentBowlers.length > 0">
+           <span>VS</span>
+        </div>
+
+        <div class="bowler-container" *ngIf="currentBowlers.length > 0">
+           <div class="bowler-card" *ngFor="let bowl of currentBowlers">
+            <div class="player-avatar">
+              <img src="https://www.w3schools.com/howto/img_avatar2.png" alt="Avatar">
+            </div>
+            <div class="player-info">
+              <div class="p-name">{{ bowl.bowler }}</div>
+              <div class="p-figures">
+                {{ bowl.wickets }}-{{ bowl.runs }} <span class="overs">({{ bowl.overs }})</span>
+              </div>
+            </div>
+           </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-box">
+           <label>Partnership</label>
+           <div class="stat-value">{{ match.partnership || '0 (0)' }}</div>
+        </div>
+        <div class="stat-box">
+           <label>Run Rate</label>
+           <div class="stat-value">
+              CRR: {{ calculateRunRate(match.score1, match.overs1) }}
+           </div>
+        </div>
+      </div>
+
+      <!-- Recent Overs -->
+      <div class="recent-overs-card" *ngIf="match.recentOvers && match.recentOvers.length">
+        <h4>Recent Overs</h4>
+        <div class="overs-list">
+          <div class="over-circle" *ngFor="let ball of match.recentOvers">
+            {{ ball }}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Scorecard Tab -->
+    <div *ngIf="activeTab === 'scorecard'" class="scorecard-tab">
+      <div class="card" *ngIf="match.scorecard?.batting?.length">
+        <h4>Batting</h4>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="text-left">Batter</th>
+                <th>R</th>
+                <th>B</th>
+                <th>4s</th>
+                <th>6s</th>
+                <th>SR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let b of match.scorecard.batting">
+                <td class="text-left">
+                  <div class="player-name">{{ b.batsman }}</div>
+                  <div class="dismissal-text">
+                    <ng-container *ngFor="let part of parseDismissal(b.dismissal, b.batsman)">
+                      <span *ngIf="part.type === 'text'">{{ part.value }}</span>
+                      
+                      <!-- Bat Icon (Batting) -->
+                      <span *ngIf="part.type === 'icon' && part.value === 'bat'" class="icon-bat" title="Batting">
+                        <img src="/bat_icon.png" alt="Batting" class="icon-bat-img">
+                      </span>
+
+                      <!-- Ball Icon (Bowled) -->
+                      <span *ngIf="part.type === 'icon' && part.value === 'ball'" class="icon-ball" title="Bowled">
+                        <img src="/ball_icon.png" alt="Bowled" class="icon-ball-img">
+                      </span>
+
+                      <!-- Hand Icon (Caught) -->
+                      <span *ngIf="part.type === 'icon' && part.value === 'hand'" class="icon-hand" title="Caught">
+                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                           <!-- Ball falling -->
+                           <circle cx="12" cy="5" r="3" fill="#d32f2f" />
+                           <!-- Simple Hand Catching -->
+                           <path d="M12 23c4.97 0 9-3.5 9-8V9c0-1.1-.9-2-2-2s-2 .9-2 2v5h-1V8c0-1.1-.9-2-2-2s-2 .9-2 2v6h-1V9c0-1.1-.9-2-2-2s-2 .9-2 2v5H9V10c0-1.1-.9-2-2-2S5 8.9 5 10v5c0 4.5 4.03 8 7 8z" fill="#FBC02D" stroke="#333" stroke-width="1"/>
+                         </svg>
+                      </span>
+
+                      <!-- Stumps Icon (LBW/RunOut) -->
+                      <span *ngIf="part.type === 'icon' && part.value === 'stumps'" class="icon-stumps" [title]="part.title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="#333">
+                          <rect x="6" y="4" width="2" height="16" rx="1" />
+                          <rect x="11" y="4" width="2" height="16" rx="1" />
+                          <rect x="16" y="4" width="2" height="16" rx="1" />
+                          <rect x="5" y="2" width="14" height="2" />
+                        </svg>
+                      </span>
+
+                       <!-- Striker Ball Icon (if applicable) -->
+                      <span *ngIf="part.type === 'icon' && part.value === 'ball_small'" class="icon-ball-small" title="On Strike">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="#d32f2f">
+                          <circle cx="12" cy="12" r="10" />
+                        </svg>
+                      </span>
+                    </ng-container>
+                  </div>
+                </td>
+                <td class="font-weight-bold">{{ b.runs }}</td>
+                <td>{{ b.balls }}</td>
+                <td>{{ b.fours }}</td>
+                <td>{{ b.sixes }}</td>
+                <td>{{ b.sr }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" *ngIf="match.scorecard?.bowling?.length">
+        <h4>Bowling</h4>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="text-left">Bowler</th>
+                <th>O</th>
+                <th>M</th>
+                <th>R</th>
+                <th>W</th>
+                <th>ER</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let bw of match.scorecard.bowling">
+                <td class="text-left player-name">{{ bw.bowler }}</td>
+                <td>{{ bw.overs }}</td>
+                <td>{{ bw.maidens }}</td>
+                <td>{{ bw.runs }}</td>
+                <td class="font-weight-bold">{{ bw.wickets }}</td>
+                <td>{{ bw.er }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div *ngIf="!match.scorecard?.batting?.length && !match.scorecard?.bowling?.length" class="no-data">
+        No scorecard data available yet.
+      </div>
+    </div>
+
+    <!-- Commentary Tab -->
+    <!-- Commentary Tab -->
+    <div *ngIf="activeTab === 'commentary'" class="commentary-tab">
+      
+      <!-- Filters -->
+      <div class="comm-filters">
+        <button [class.active]="commentaryFilter === 'All'" (click)="setFilter('All')">All</button>
+        <button [class.active]="commentaryFilter === 'Highlights'" (click)="setFilter('Highlights')">Highlights</button>
+        <button [class.active]="commentaryFilter === 'Overs'" (click)="setFilter('Overs')">Overs</button>
+        <button [class.active]="commentaryFilter === 'W'" (click)="setFilter('W')">W</button>
+        <button [class.active]="commentaryFilter === '6s'" (click)="setFilter('6s')">6s</button>
+        <button [class.active]="commentaryFilter === '4s'" (click)="setFilter('4s')">4s</button>
+      </div>
+
+      <div class="comm-list">
+        <!-- Iterate over FILTERED list -->
+        <ng-container *ngFor="let comm of filteredCommentary; let i = index">
+            
+            <!-- Over Summary (inserted when over changes) -->
+            <!-- Pass current item and previous item from the filtered list -->
+            <div *ngIf="showOverHeader(comm, i > 0 ? filteredCommentary[i-1] : null)" class="over-summary-card">
+                 <div class="os-header">
+                    <span class="os-title">OVER {{ +comm.over + 1 }}</span>
+                 </div>
+                 <div class="os-stats">
+                     <span class="runs-summary">End of Over</span>
+                 </div>
+            </div>
+
+            <div class="comm-item" [class.wicket-item]="comm.isWicket">
+                <div class="comm-left">
+                     <span class="over-num">{{ comm.over }}.{{ comm.ball }}</span>
+                     <div class="score-circle" [ngClass]="{'c-four': comm.score=='4', 'c-six': comm.score=='6', 'c-wicket': comm.isWicket}">
+                        {{ comm.score }}
+                     </div>
+                </div>
+                <div class="comm-content">
+                     <div class="comm-text">{{ comm.description }}</div>
+                </div>
+            </div>
+        </ng-container>
+        
+        <div *ngIf="filteredCommentary.length === 0" class="no-data">
+            <span *ngIf="match.commentary?.length">No items found for this filter.</span>
+            <span *ngIf="!match.commentary?.length">Loading commentary...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
