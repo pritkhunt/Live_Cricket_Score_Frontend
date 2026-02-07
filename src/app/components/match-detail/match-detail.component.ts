@@ -22,7 +22,7 @@ export class MatchDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private matchService: MatchService,
     private socketService: SocketService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.matchId = this.route.snapshot.paramMap.get('id');
@@ -63,7 +63,7 @@ export class MatchDetailComponent implements OnInit, OnDestroy {
   parseDismissal(dismissal: string, batsmanName: string): any[] {
     const parts: any[] = [];
     if (!dismissal) return parts;
-    
+
     // Trim input
     dismissal = dismissal.trim();
 
@@ -71,75 +71,75 @@ export class MatchDetailComponent implements OnInit, OnDestroy {
     if (dismissal === 'Batting' || dismissal === 'not out') {
       parts.push({ type: 'icon', value: 'bat', title: 'Batting' });
       // Logic for striker (asterisk check)
-       if (batsmanName && batsmanName.includes('*')) {
-          parts.push({ type: 'icon', value: 'ball_small', title: 'On Strike' });
-       }
+      if (batsmanName && batsmanName.includes('*')) {
+        parts.push({ type: 'icon', value: 'ball_small', title: 'On Strike' });
+      }
       return parts;
     }
 
     // Pattern: c Fielder b Bowler
     // Let's use a regex to find keywords and split
     const regex = /\b(c |b |lbw|run out)\b/g;
-    
+
     let lastIndex = 0;
     let match;
-    
+
     while ((match = regex.exec(dismissal)) !== null) {
-        // Text before the match
-        if (match.index > lastIndex) {
-            parts.push({ type: 'text', value: dismissal.substring(lastIndex, match.index) });
-        }
-        
-        // The keyword
-        const keyword = match[0].trim();
-        if (keyword === 'c') {
-            parts.push({ type: 'icon', value: 'hand', title: 'Caught' });
-        } else if (keyword === 'b') {
-            parts.push({ type: 'icon', value: 'ball', title: 'Bowled' });
-        } else if (keyword === 'lbw') {
-             parts.push({ type: 'icon', value: 'stumps', title: 'LBW' });
-        } else if (keyword === 'run out') {
-             parts.push({ type: 'icon', value: 'stumps', title: 'Run Out' });
-        }
-        
-        lastIndex = regex.lastIndex;
+      // Text before the match
+      if (match.index > lastIndex) {
+        parts.push({ type: 'text', value: dismissal.substring(lastIndex, match.index) });
+      }
+
+      // The keyword
+      const keyword = match[0].trim();
+      if (keyword === 'c') {
+        parts.push({ type: 'icon', value: 'hand', title: 'Caught' });
+      } else if (keyword === 'b') {
+        parts.push({ type: 'icon', value: 'ball', title: 'Bowled' });
+      } else if (keyword === 'lbw') {
+        parts.push({ type: 'icon', value: 'stumps', title: 'LBW' });
+      } else if (keyword === 'run out') {
+        parts.push({ type: 'icon', value: 'stumps', title: 'Run Out' });
+      }
+
+      lastIndex = regex.lastIndex;
     }
-    
+
     // Remaining text
     if (lastIndex < dismissal.length) {
-        parts.push({ type: 'text', value: dismissal.substring(lastIndex) });
+      parts.push({ type: 'text', value: dismissal.substring(lastIndex) });
     }
-    
+
     return parts;
   }
 
   get currentBatsmen(): any[] {
     if (!this.match?.scorecard?.batting) return [];
-    return this.match.scorecard.batting.filter((b: any) => 
-      b.dismissal === 'Batting' || 
-      b.dismissal === 'not out' || 
+    return this.match.scorecard.batting.filter((b: any) =>
+      b.dismissal === 'Batting' ||
+      b.dismissal === 'not out' ||
       b.batsman.includes('*')
     );
   }
 
   get currentBowlers(): any[] {
     if (!this.match?.scorecard?.bowling) return [];
-    
+
     const bowlers = this.match.scorecard.bowling;
-    
+
     // 1. Check for bowler with incomplete over (e.g., 1.3, 2.5)
     // Note: 'overs' is a string like "2.0" or "1.3"
     const activeBowler = bowlers.find((b: any) => {
-        const parts = b.overs.toString().split('.');
-        if (parts.length > 1) {
-            const balls = parseInt(parts[1], 10);
-            return balls > 0 && balls < 6;
-        }
-        return false;
+      const parts = b.overs.toString().split('.');
+      if (parts.length > 1) {
+        const balls = parseInt(parts[1], 10);
+        return balls > 0 && balls < 6;
+      }
+      return false;
     });
 
     if (activeBowler) {
-        return [activeBowler];
+      return [activeBowler];
     }
 
     // 2. If all overs are complete, it's ambiguous.
@@ -158,61 +158,61 @@ export class MatchDetailComponent implements OnInit, OnDestroy {
   commentaryFilter: string = 'All';
 
   setFilter(filter: string): void {
-      this.commentaryFilter = filter;
+    this.commentaryFilter = filter;
   }
 
   get filteredCommentary(): any[] {
-      if (!this.match?.commentary) return [];
-      
-      const allComm = this.match.commentary;
-      
-      switch (this.commentaryFilter) {
-          case 'Highlights':
-              // Example logic for highlights: events that are not dots/singles
-              return allComm.filter((c: any) => c.score === '4' || c.score === '6' || c.isWicket);
-          case 'Overs':
-              // Showing only end of overs? or just grouping
-              // Maybe just return all, logic is handled in template, OR filter for 'start/end' of overs
-              // Let's filter for just the over summaries? 
-              // Based on UI buttons, 'Overs' likely means Over summaries or similar.
-              // But standard implementations usually show "Wickets" and "Boundaries".
-              // Let's assume 'Overs' might filter to show the last ball of each over.
-              return allComm.filter((_: any, i: number) => this.isNewOver(allComm[i], i));
-          case 'W':
-              return allComm.filter((c: any) => c.isWicket);
-          case '6s':
-              return allComm.filter((c: any) => c.score === '6');
-          case '4s':
-              return allComm.filter((c: any) => c.score === '4');
-          case 'All':
-          default:
-              return allComm;
-      }
+    if (!this.match?.commentary) return [];
+
+    const allComm = this.match.commentary;
+
+    switch (this.commentaryFilter) {
+      case 'Highlights':
+        // Example logic for highlights: events that are not dots/singles
+        return allComm.filter((c: any) => c.score === '4' || c.score === '6' || c.isWicket);
+      case 'Overs':
+        // Showing only end of overs? or just grouping
+        // Maybe just return all, logic is handled in template, OR filter for 'start/end' of overs
+        // Let's filter for just the over summaries? 
+        // Based on UI buttons, 'Overs' likely means Over summaries or similar.
+        // But standard implementations usually show "Wickets" and "Boundaries".
+        // Let's assume 'Overs' might filter to show the last ball of each over.
+        return allComm.filter((_: any, i: number) => this.isNewOver(allComm[i], i));
+      case 'W':
+        return allComm.filter((c: any) => c.isWicket);
+      case '6s':
+        return allComm.filter((c: any) => c.score === '6');
+      case '4s':
+        return allComm.filter((c: any) => c.score === '4');
+      case 'All':
+      default:
+        return allComm;
+    }
   }
 
   isNewOver(current: any, index: number): boolean {
     if (index === 0) return true;
-    
+
     // Safety check if we are filtering:
     // This logic relies on the full list index. If filtering, "index-1" might correspond to a completely different over.
     // However, if we are in "All" view, it works.
     // If we are in "Wicket" view, we probably don't want "New Over" headers unless the wicket was the first ball?
     // Let's rely on the template iterating over 'filteredCommentary' and passing the filtered index?
     // Actually, headers usually only show in "All" or "Overs" view.
-    if (this.commentaryFilter !== 'All') return false; 
-    
+    if (this.commentaryFilter !== 'All') return false;
+
     const prev = this.match.commentary[index - 1]; // This is risky if passing filtered index.
     // Ideally the template loop variable 'comm' and 'i' refers to filtered list.
     // So 'prev' should be filteredCommentary[index-1]
-    
+
     return false; // See updated logic below
   }
-  
+
   // Updated helper that takes the list being iterated
   showOverHeader(item: any, prevItem: any): boolean {
-      if (this.commentaryFilter !== 'All') return false;
-      if (!prevItem) return true; // First item always shows header in All view
-      return item.over !== prevItem.over;
+    if (this.commentaryFilter !== 'All') return false;
+    if (!prevItem) return true; // First item always shows header in All view
+    return item.over !== prevItem.over;
   }
 
   getBallClass(ball: string): string {
@@ -224,5 +224,24 @@ export class MatchDetailComponent implements OnInit, OnDestroy {
     if (b === '6' || b.includes('6')) return 'six';
     if (b === '0' || b === 'dot') return 'dot';
     return 'run';
+  }
+
+  get isWomenMatch(): boolean {
+    if (!this.match) return false;
+    const t1 = (this.match.team1 || '').toLowerCase();
+    const t2 = (this.match.team2 || '').toLowerCase();
+    // Keywords to identify women's match
+    const keywords = ['women', 'wmn', 'ladies', 'girls'];
+    return keywords.some(k => t1.includes(k) || t2.includes(k));
+  }
+
+  getPlayerAvatar(): string {
+    if (this.isWomenMatch) {
+      // Female Avatar
+      return 'https://www.w3schools.com/howto/img_avatar2.png';
+    } else {
+      // Male Avatar
+      return 'https://www.w3schools.com/howto/img_avatar.png';
+    }
   }
 }
