@@ -6,9 +6,9 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class MatchService {
-  private apiUrl = 'http://localhost:3000/api/matches';
+  private apiUrl = 'https://live-cricket-score-backend.onrender.com/api/matches';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getLiveMatches(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/live`);

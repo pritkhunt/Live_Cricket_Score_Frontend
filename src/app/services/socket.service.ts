@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class SocketService {
   private socket: Socket;
-  private readonly URL = 'http://localhost:3000'; // Backend URL
+  private readonly URL = 'https://live-cricket-score-backend.onrender.com'; // Backend URL
 
   constructor(private ngZone: NgZone) {
     this.socket = io(this.URL);
