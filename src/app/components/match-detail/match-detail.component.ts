@@ -230,9 +230,13 @@ export class MatchDetailComponent implements OnInit, OnDestroy {
     if (!this.match) return false;
     const t1 = (this.match.team1 || '').toLowerCase();
     const t2 = (this.match.team2 || '').toLowerCase();
-    // Keywords to identify women's match
-    const keywords = ['women', 'wmn', 'ladies', 'girls'];
-    return keywords.some(k => t1.includes(k) || t2.includes(k));
+    // Keywords and patterns to identify women's match
+    // Matches "women", "wmn", "ladies", "girls", "-w", "(w)", "w-a", etc.
+    const patterns = [
+      /\bwomen\b/, /\bwmn\b/, /\bladies\b/, /\bgirls\b/,
+      /-w\b/, /\(w\)/, /w-/, /-w-/
+    ];
+    return patterns.some(p => p.test(t1) || p.test(t2));
   }
 
   getPlayerAvatar(): string {
