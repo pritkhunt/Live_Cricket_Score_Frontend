@@ -1,6 +1,7 @@
 .match-list {
   .section-header {
     margin-bottom: 15px;
+
     h2 {
       font-size: 1.25rem;
       color: var(--accent-blue);
@@ -11,6 +12,10 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 15px;
+
+    @media (max-width: 400px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   .match-card {
@@ -38,7 +43,7 @@
         display: flex;
         align-items: center;
         gap: 6px;
-        
+
         .dot {
           width: 8px;
           height: 8px;
@@ -69,6 +74,7 @@
 
     .match-info {
       margin-bottom: 16px;
+
       .match-desc {
         font-size: 0.85rem;
         color: #888;
@@ -126,7 +132,7 @@
           .batting-icon {
             display: flex;
             align-items: center;
-            
+
             .bat-img {
               width: 16px;
               height: 16px;
